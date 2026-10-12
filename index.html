@@ -634,16 +634,41 @@ ps.t=setTimeout(()=>{if(el.classList.contains('held'))return;ps.over(null);const
 /* pick up & drop */
 let held=0;const pick=a=>a[Math.floor(Math.random()*a.length)];
 const GIG=[[POSE.giggle,'Hehehehe!'],[POSE.shy,'Kemana kan niiii?'],[POSE.cheer,'Where we goinnnn?']];
-function draggable(el,getA,sayFn,ps){const im=el.querySelector('img');let sx=0,sy=0,ox=0,oy=0,moved=false,down=false,swing=null;
-im.addEventListener('pointerdown',e=>{down=true;moved=false;sx=e.clientX;sy=e.clientY;const tr=(el.style.translate||'0px 0px').split(' ');ox=parseFloat(tr[0])||0;oy=parseFloat(tr[1])||0;try{im.setPointerCapture(e.pointerId)}catch(_){}});
-im.addEventListener('pointermove',e=>{if(!down)return;const dx=e.clientX-sx,dy=e.clientY-sy;
+function draggable(el,getA,sayFn,ps,setA){const im=el.querySelector('img');let sx=0,sy=0,ox=0,oy=0,moved=false,down=false,swing=null,trail=[];
+im.addEventListener('pointerdown',e=>{down=true;moved=false;trail=[[e.timeStamp,e.clientX,e.clientY]];sx=e.clientX;sy=e.clientY;const tr=(el.style.translate||'0px 0px').split(' ');ox=parseFloat(tr[0])||0;oy=parseFloat(tr[1])||0;try{im.setPointerCapture(e.pointerId)}catch(_){}});
+im.addEventListener('pointermove',e=>{if(!down)return;const dx=e.clientX-sx,dy=e.clientY-sy;trail.push([e.timeStamp,e.clientX,e.clientY]);if(trail.length>8)trail.shift();
 if(!moved&&Math.hypot(dx,dy)>6){moved=true;held++;const a=getA();if(a&&a.playState=='running')a.pause();el.classList.add('held');swing=im.animate([{transform:'rotate(-9deg)'},{transform:'rotate(9deg)'}],{duration:240,iterations:Infinity,direction:'alternate',easing:'ease-in-out'});clearTimeout(ps.t);ps.resume=null;const g=pick(GIG);ps.over(g[0]);sayFn(g[1])}
 if(moved){el.style.translate=`${ox+dx}px ${oy+dy}px`;e.preventDefault()}});
-const up=()=>{if(!down)return;down=false;if(!moved)return;held=Math.max(0,held-1);el.classList.remove('held');ps.over(null);if(swing){swing.cancel();swing=null}
+const up=e=>{if(!down)return;down=false;if(!moved)return;held=Math.max(0,held-1);el.classList.remove('held');ps.over(null);if(swing){swing.cancel();swing=null}
+/* let go while still moving fast = a flick */
+const t1=e.timeStamp,rec=trail.filter(p=>t1-p[0]<100),q=rec[0],l=trail[trail.length-1],dt=q&&l?l[0]-q[0]:0;
+if(dt>0){const vx=(l[1]-q[1])/dt,vy=(l[2]-q[2])/dt;if(Math.hypot(vx,vy)>.7){el._dragged=Date.now();fling(el,ps,sayFn,getA,setA,vx,vy);return}}
 im.animate([{transform:'scale(1.12,.86)'},{transform:'scale(.94,1.06)'},{transform:'scale(1)'}],{duration:380,easing:'ease-out'});
 const a=getA();if(a&&a.playState=='paused')a.play();sayFn(pick(['Okay, carry on!','Thanks for the lift!','Back to it!']));el._dragged=Date.now()};
 im.addEventListener('pointerup',up);im.addEventListener('pointercancel',up)}
-draggable(w,()=>cur,say,pm);draggable(w2,()=>cur2,say2,pw);
+draggable(w,()=>cur,say,pm,a=>cur=a);draggable(w2,()=>cur2,say2,pw,a=>cur2=a);
+/* flick: fly far away until it's a dot, then walk back growing bigger, then stroll off */
+async function fling(el,ps,sayFn,getA,setA,vx,vy){const im=el.querySelector('img'),r=im.getBoundingClientRect(),W=el.offsetWidth,H=el.offsetHeight,id=el._fl=(el._fl||0)+1,ok=()=>el._fl===id;
+const a0=getA();if(a0){try{a0.cancel()}catch(e){}}
+el.classList.remove('idle');el.style.translate='';const b=el.querySelector('.mb');b.style.rotate=b.style.translate='';
+const x0=r.left+r.width/2,y0=r.top+r.height/2;el.style.left=(x0-W/2)+'px';el.style.top=(y0-H/2)+'px';el.style.visibility='visible';held++;
+const done=()=>{held=Math.max(0,held-1)},cl=(v,a,c)=>Math.min(c,Math.max(a,v)),sp=Math.hypot(vx,vy),ux=vx/sp,uy=vy/sp;
+const T=(x,y,s,rot)=>`translate(${x-x0}px,${y-y0}px) rotate(${rot}deg) scale(${s})`;
+const run=(fr,o)=>{const a=el.animate(fr,Object.assign({fill:'forwards'},o));setA(a);return a.finished.then(()=>ok(),()=>false)};
+const fx=cl(x0+ux*innerWidth*.6,30,innerWidth-30),fy=cl(y0+uy*innerHeight*.6,innerHeight*.1,innerHeight*.55),spin=(ux<0?-1:1)*720;
+ps.over(POSE.cheer);sayFn(pick(['Wheeeee!','Aaaaaaa~!','Byeeee!']));
+if(!await run([{transform:T(x0,y0,1,0)},{transform:T(x0+(fx-x0)*.85,y0+(fy-y0)*.85,.14,spin*.8),offset:.7},{transform:T(fx,fy,.07,spin)}],{duration:1100,easing:'cubic-bezier(.2,.7,.3,1)'}))return done();
+if(!await run([{transform:T(fx,fy,.07,0)},{transform:T(fx,fy-4,.08,0)},{transform:T(fx,fy,.07,0)}],{duration:450,iterations:2}))return done();
+/* walk back: grows slowly at first, faster as it gets close */
+ps.over(null);ps.base(MF);
+const tx=cl(x0,W/2+10,innerWidth-W/2-10),ty=cl(y0,innerHeight*.4,innerHeight-navH()-H/2-10),dur=5000,N=Math.round(dur/320),fr=[];
+for(let k=0;k<=N;k++){const t=k/N,s=.07+.93*Math.pow(t,1.6),p=(s-.07)/.93,odd=k%2;fr.push({transform:T(fx+(tx-fx)*p,fy+(ty-fy)*p+(odd?-6*s:0),s,k==0||k==N?0:(odd?6:-6)),offset:t})}
+setTimeout(()=>{if(ok())sayFn('Coming baaack~')},1600);
+if(!await run(fr,{duration:dur,easing:'linear'}))return done();
+sayFn(pick(["I'm baaack!",'Again! Again!','Hehe, best ride!']));await sleep(1400);if(!ok())return done();
+const L=tx<innerWidth/2,ex=L?-W:innerWidth+W,dur2=Math.abs(ex-tx)/70*1000,N2=Math.max(4,Math.round(dur2/320)),f2=[];ps.base(L?ML:MR);
+for(let k=0;k<=N2;k++){const t=k/N2,odd=k%2;f2.push({transform:T(tx+(ex-tx)*t,ty+(odd?-6:0),1,k==0||k==N2?0:(odd?6:-6)),offset:t})}
+if(await run(f2,{duration:dur2,easing:'linear'}))el.style.visibility='hidden';done()}
 const KEYS=Object.keys(B);window.mascot=k=>B[k]&&B[k]();
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 let idleL=Math.random()<.5;
